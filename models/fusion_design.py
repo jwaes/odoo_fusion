@@ -29,7 +29,6 @@ class FusionDesign(models.Model):
     state = fields.Selection([
         ('draft', 'Draft'),
         ('synced', 'Synced'),
-        ('modified', 'Modified in Fusion'),
         ('error', 'Error')
     ], string='Status', default='draft', required=True)
     
@@ -71,24 +70,21 @@ class FusionDesign(models.Model):
         return super().create(vals_list)
 
     @api.model
-    def create_from_fusion(self, vals):
-        """Create a new design record from Fusion 360 data"""
+    def sync_from_fusion(self, vals):
+        """Sync (create or update) a design record from Fusion 360 data"""
         if not vals.get('fusion_uuid'):
             raise ValidationError('Fusion UUID is required')
-            
+        
+        # Search for existing design
+        existing = self.search([('fusion_uuid', '=', vals['fusion_uuid'])], limit=1)
+        
         vals['state'] = 'synced'
         vals['last_sync'] = fields.Datetime.now()
-        return self.create(vals)
-
-    def update_from_fusion(self, vals):
-        """Update design data from Fusion 360"""
-        self.ensure_one()
-        vals['state'] = 'synced'
-        vals['last_sync'] = fields.Datetime.now()
-        return self.write(vals)
-
-    def mark_modified(self):
-        """Mark the design as modified in Fusion"""
-        self.write({
-            'state': 'modified'
-        })
+        
+        if existing:
+            # Update existing design
+            existing.write(vals)
+            return existing.id
+        else:
+            # Create new design
+            return self.create(vals).id

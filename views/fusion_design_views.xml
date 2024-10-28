@@ -5,7 +5,7 @@
         <field name="name">fusion.design.tree</field>
         <field name="model">fusion.design</field>
         <field name="arch" type="xml">
-            <tree string="Fusion Designs" decoration-danger="state=='error'" decoration-warning="state=='modified'" decoration-success="state=='synced'">
+            <tree string="Fusion Designs" decoration-danger="state=='error'" decoration-success="state=='synced'">
                 <field name="default_code"/>
                 <field name="name"/>
                 <field name="fusion_uuid"/>
@@ -23,7 +23,7 @@
         <field name="arch" type="xml">
             <form string="Fusion Design">
                 <header>
-                    <field name="state" widget="statusbar" statusbar_visible="draft,synced,modified"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,synced"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
@@ -69,7 +69,6 @@
                 <separator/>
                 <filter string="Draft" name="state_draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Synced" name="state_synced" domain="[('state', '=', 'synced')]"/>
-                <filter string="Modified" name="state_modified" domain="[('state', '=', 'modified')]"/>
                 <filter string="Error" name="state_error" domain="[('state', '=', 'error')]"/>
                 <group expand="0" string="Group By">
                     <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
@@ -98,7 +97,7 @@
     <menuitem id="menu_fusion_root"
               name="Fusion"
               parent="mrp.menu_mrp_root"
-              sequence="100"
+              sequence="50"
               groups="group_fusion_user"/>
 
     <menuitem id="menu_fusion_design"
