@@ -26,6 +26,41 @@ class FusionDesign(models.Model):
         copy=False,
         help='Unique identifier from Fusion 360'
     )
+    version_id = fields.Char(
+        string='Version ID',
+        readonly=True,
+        help='Fusion version identifier'
+    )
+    version_number = fields.Char(
+        string='Version Number',
+        readonly=True,
+        help='Fusion version number'
+    )
+    last_updated_by = fields.Char(
+        string='Last Updated By',
+        readonly=True,
+        help='User who last updated the design in Fusion'
+    )
+    fusion_web_url = fields.Char(
+        string='Fusion Web URL',
+        readonly=True,
+        help='URL to view the design in Fusion 360 web interface'
+    )
+    shared_link = fields.Char(
+        string='Shared Link',
+        readonly=True,
+        help='Shared link to the design'
+    )
+    date_created = fields.Datetime(
+        string='Created in Fusion',
+        readonly=True,
+        help='Date when the design was created in Fusion'
+    )
+    date_modified = fields.Datetime(
+        string='Modified in Fusion',
+        readonly=True,
+        help='Date when the design was last modified in Fusion'
+    )
     state = fields.Selection([
         ('draft', 'Draft'),
         ('synced', 'Synced'),
