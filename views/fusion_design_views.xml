@@ -56,8 +56,8 @@
                     <group string="Sharing">
                         <group>
                             <field name="shared_link_active"/>
-                            <field name="shared_link_download" attrs="{'invisible': [('shared_link_active', '=', False)]}"/>
-                            <field name="shared_link_url" widget="url" attrs="{'invisible': [('shared_link_active', '=', False)]}"/>
+                            <field name="shared_link_download" invisible="not shared_link_active"/>
+                            <field name="shared_link_url" widget="url" invisible="not shared_link_active"/>
                         </group>
                     </group>
                     <notebook>
