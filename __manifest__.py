@@ -6,11 +6,12 @@
     'author': 'Jaco Tech',
     'website': 'https://jaco.tech',
     'license': 'LGPL-3',
-    'depends': ['base', 'mrp'],
+    'depends': ['base', 'mrp', 'product'],
     'data': [
         'security/fusion_security.xml',
         'security/ir.model.access.csv',
         'views/fusion_design_views.xml',
+        'views/fusion_product_views.xml',
         'views/fusion_user_views.xml',
         'views/res_config_settings_views.xml',
         'data/fusion_sequence.xml',

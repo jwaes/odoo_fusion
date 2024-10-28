@@ -10,10 +10,24 @@
             <field name="company_id" eval="False"/>
         </record>
 
-        <!-- Default Configuration Parameter -->
+        <!-- Sequence for Fusion Products -->
+        <record id="seq_fusion_product" model="ir.sequence">
+            <field name="name">Fusion Product</field>
+            <field name="code">fusion.product.default.code</field>
+            <field name="prefix">FPR</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Default Configuration Parameters -->
         <record id="default_fusion_sequence" model="ir.config_parameter">
             <field name="key">odoo_fusion.fusion_sequence_id</field>
             <field name="value" ref="seq_fusion_design"/>
+        </record>
+
+        <record id="default_fusion_product_sequence" model="ir.config_parameter">
+            <field name="key">odoo_fusion.fusion_product_sequence_id</field>
+            <field name="value" ref="seq_fusion_product"/>
         </record>
     </data>
 </odoo>

@@ -20,6 +20,18 @@
                                 </div>
                             </div>
                         </setting>
+                        <setting id="fusion_product_sequence_setting" 
+                                title="Configure the sequence for Fusion product references"
+                                help="This sequence will be used to generate unique reference numbers for Fusion products">
+                            <field name="fusion_product_sequence_id" required="1"/>
+                            <div class="content-group">
+                                <div class="mt8">
+                                    <p class="text-muted">
+                                        The sequence will be used when creating new products from Fusion 360 components
+                                    </p>
+                                </div>
+                            </div>
+                        </setting>
                     </block>
                 </app>
             </field>

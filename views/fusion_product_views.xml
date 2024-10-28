@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="fusion_product_template_form_view" model="ir.ui.view">
+        <field name="name">fusion.product.template.form</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page string="Fusion" name="fusion">
+                    <group>
+                        <field name="fusion_uuid"/>
+                        <field name="fusion_design_id"/>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>
