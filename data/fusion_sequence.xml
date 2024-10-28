@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sequence for Fusion Designs -->
+        <record id="seq_fusion_design" model="ir.sequence">
+            <field name="name">Fusion Design</field>
+            <field name="code">fusion.design</field>
+            <field name="prefix">FUS</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Default Configuration Parameter -->
+        <record id="default_fusion_sequence" model="ir.config_parameter">
+            <field name="key">odoo_fusion.fusion_sequence_id</field>
+            <field name="value" ref="seq_fusion_design"/>
+        </record>
+    </data>
+</odoo>

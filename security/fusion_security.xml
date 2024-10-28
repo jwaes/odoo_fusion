@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Fusion Integration Security Category -->
+        <record id="module_category_fusion" model="ir.module.category">
+            <field name="name">Fusion Integration</field>
+            <field name="description">Manage Fusion 360 integration</field>
+            <field name="sequence">20</field>
+        </record>
+
+        <!-- Fusion User Group -->
+        <record id="group_fusion_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="module_category_fusion"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user')), (4, ref('mrp.group_mrp_user'))]"/>
+        </record>
+
+        <!-- Fusion Manager Group -->
+        <record id="group_fusion_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="category_id" ref="module_category_fusion"/>
+            <field name="implied_ids" eval="[(4, ref('group_fusion_user')), (4, ref('mrp.group_mrp_manager'))]"/>
+            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+        </record>
+    </data>
+</odoo>
