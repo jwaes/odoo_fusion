@@ -10,6 +10,7 @@
                 <field name="name"/>
                 <field name="version_number"/>
                 <field name="last_updated_by_id"/>
+                <field name="shared_link_active" widget="boolean_toggle"/>
                 <field name="date_modified"/>
                 <field name="state"/>
                 <field name="last_sync"/>
@@ -50,7 +51,13 @@
                         <group string="Sync Information">
                             <field name="last_sync"/>
                             <field name="fusion_web_url" widget="url"/>
-                            <field name="shared_link" widget="url"/>
+                        </group>
+                    </group>
+                    <group string="Sharing">
+                        <group>
+                            <field name="shared_link_active"/>
+                            <field name="shared_link_download" attrs="{'invisible': [('shared_link_active', '=', False)]}"/>
+                            <field name="shared_link_url" widget="url" attrs="{'invisible': [('shared_link_active', '=', False)]}"/>
                         </group>
                     </group>
                     <notebook>
@@ -78,6 +85,8 @@
                 <filter string="Draft" name="state_draft" domain="[('state', '=', 'draft')]"/>
                 <filter string="Synced" name="state_synced" domain="[('state', '=', 'synced')]"/>
                 <filter string="Error" name="state_error" domain="[('state', '=', 'error')]"/>
+                <separator/>
+                <filter string="Shared" name="shared" domain="[('shared_link_active', '=', True)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
                     <filter string="Last Updated By" name="group_by_updater" context="{'group_by': 'last_updated_by_id'}"/>

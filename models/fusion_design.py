@@ -65,10 +65,20 @@ class FusionDesign(models.Model):
         readonly=True,
         help='URL to view the design in Fusion 360 web interface'
     )
-    shared_link = fields.Char(
+    shared_link_url = fields.Char(
         string='Shared Link',
         readonly=True,
-        help='Shared link to the design'
+        help='URL to share the design'
+    )
+    shared_link_active = fields.Boolean(
+        string='Is Shared',
+        readonly=True,
+        help='Whether the design is currently shared'
+    )
+    shared_link_download = fields.Boolean(
+        string='Download Allowed',
+        readonly=True,
+        help='Whether downloading is allowed for shared link'
     )
     date_created = fields.Datetime(
         string='Created in Fusion',
@@ -113,12 +123,19 @@ class FusionDesign(models.Model):
         
         # Handle user sync
         if vals.get('last_updated_by'):
-            user_vals = {
-                'name': vals['last_updated_by']['name'],
-                'fusion_id': vals['last_updated_by']['id']
-            }
+            user_vals = vals['last_updated_by']
             vals['last_updated_by_id'] = self.env['fusion.user'].sync_from_fusion(user_vals)
             del vals['last_updated_by']
+        
+        # Handle shared link
+        if vals.get('shared_link'):
+            shared_link = vals['shared_link']
+            vals.update({
+                'shared_link_url': shared_link['url'],
+                'shared_link_active': shared_link['is_shared'],
+                'shared_link_download': shared_link['allow_download']
+            })
+            del vals['shared_link']
         
         # Search for existing design
         existing = self.search([('fusion_uuid', '=', vals['fusion_uuid'])], limit=1)
