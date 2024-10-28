@@ -9,15 +9,18 @@ class FusionUser(models.Model):
     name = fields.Char(
         string='User Name',
         required=True,
+        readonly=True,
         help='Username from Fusion 360'
     )
     display_name = fields.Char(
         string='Display Name',
         required=True,
+        readonly=True,
         help='Display name from Fusion 360'
     )
     email = fields.Char(
         string='Email',
+        readonly=True,
         help='Email address from Fusion 360'
     )
     fusion_id = fields.Char(
@@ -61,5 +64,16 @@ class FusionUser(models.Model):
             existing.write(vals)
             return existing.id
         else:
+            # Try to find matching partner by email
+            if vals.get('email'):
+                partner = self.env['res.partner'].search([
+                    ('email', '=ilike', vals['email']),
+                    '|',
+                    ('active', '=', True),
+                    ('active', '=', False)
+                ], limit=1)
+                if partner:
+                    vals['partner_id'] = partner.id
+            
             # Create new user
             return self.create(vals).id

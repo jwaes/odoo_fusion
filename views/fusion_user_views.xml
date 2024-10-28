@@ -9,7 +9,6 @@
                 <field name="display_name"/>
                 <field name="name"/>
                 <field name="email"/>
-                <field name="fusion_id"/>
                 <field name="partner_id"/>
             </tree>
         </field>
@@ -29,17 +28,17 @@
                     </div>
                     <div class="oe_title">
                         <h1>
-                            <field name="display_name" placeholder="Display Name"/>
+                            <field name="display_name"/>
                         </h1>
                     </div>
                     <group>
-                        <group string="User Information">
+                        <group string="Fusion Information" class="o_cell o_readonly_modifier">
                             <field name="name"/>
                             <field name="email" widget="email"/>
                             <field name="fusion_id"/>
                         </group>
                         <group string="Odoo Integration">
-                            <field name="partner_id"/>
+                            <field name="partner_id" options="{'no_create': True}"/>
                         </group>
                     </group>
                     <notebook>
@@ -71,6 +70,9 @@
                 <field name="fusion_id"/>
                 <field name="partner_id"/>
                 <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <separator/>
+                <filter string="With Partner" name="has_partner" domain="[('partner_id', '!=', False)]"/>
+                <filter string="Without Partner" name="no_partner" domain="[('partner_id', '=', False)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Partner" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
                 </group>
