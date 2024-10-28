@@ -10,7 +10,7 @@ class FusionDesign(models.Model):
     description = fields.Text('Description')
     version_id = fields.Char('Version ID')
     version_number = fields.Integer('Version Number')
-    last_updated_by = fields.Many2one('res.users', 'Last Updated By')
+    last_updated_by = fields.Many2one('fusion.user', 'Last Updated By')
     fusion_web_url = fields.Char('Fusion Web URL')
     shared_link = fields.Many2one('fusion.shared.link', 'Shared Link')
     date_created = fields.Datetime('Date Created')
@@ -29,7 +29,7 @@ class FusionDesign(models.Model):
                 'description': fusion_data['description'],
                 'version_id': fusion_data['version_id'],
                 'version_number': fusion_data['version_number'],
-                'last_updated_by': self.env['res.users'].search([('fusion_id', '=', fusion_data['last_updated_by']['fusion_id'])], limit=1).id,
+                'last_updated_by': self.env['fusion.user'].search([('fusion_id', '=', fusion_data['last_updated_by']['fusion_id'])], limit=1).id,
                 'fusion_web_url': fusion_data['fusion_web_url'],
                 'shared_link': self.env['fusion.shared.link'].create_or_update_from_fusion(fusion_data['shared_link']).id,
                 'date_created': fusion_data['date_created'],
@@ -43,7 +43,7 @@ class FusionDesign(models.Model):
                 'description': fusion_data['description'],
                 'version_id': fusion_data['version_id'],
                 'version_number': fusion_data['version_number'],
-                'last_updated_by': self.env['res.users'].search([('fusion_id', '=', fusion_data['last_updated_by']['fusion_id'])], limit=1).id,
+                'last_updated_by': self.env['fusion.user'].search([('fusion_id', '=', fusion_data['last_updated_by']['fusion_id'])], limit=1).id,
                 'fusion_web_url': fusion_data['fusion_web_url'],
                 'shared_link': self.env['fusion.shared.link'].create_or_update_from_fusion(fusion_data['shared_link']).id,
                 'date_created': fusion_data['date_created'],
