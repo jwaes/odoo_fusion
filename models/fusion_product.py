@@ -1,5 +1,4 @@
 from odoo import models, fields, api
-from odoo.addons.odoo_fusion.models.res_config_settings import FusionSettings
 
 class FusionProduct(models.Model):
     _inherit = 'product.template'
