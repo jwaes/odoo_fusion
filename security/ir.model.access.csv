@@ -1,3 +1,5 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_fusion_design_user,fusion.design.user,model_fusion_design,group_fusion_user,1,1,1,0
 access_fusion_design_manager,fusion.design.manager,model_fusion_design,group_fusion_manager,1,1,1,1
+access_fusion_user_user,fusion.user.user,model_fusion_user,group_fusion_user,1,1,1,0
+access_fusion_user_manager,fusion.user.manager,model_fusion_user,group_fusion_manager,1,1,1,1

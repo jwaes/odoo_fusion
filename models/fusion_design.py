@@ -26,6 +26,24 @@ class FusionDesign(models.Model):
         copy=False,
         help='Unique identifier from Fusion 360'
     )
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('synced', 'Synced'),
+        ('error', 'Error')
+    ], string='Status', default='draft', required=True)
+    
+    description = fields.Text(
+        string='Description',
+        help='Design description from Fusion 360'
+    )
+    last_sync = fields.Datetime(
+        string='Last Synchronization',
+        readonly=True
+    )
+    version = fields.Char(
+        string='Version',
+        help='Design version in Fusion 360'
+    )
     version_id = fields.Char(
         string='Version ID',
         readonly=True,
@@ -36,7 +54,8 @@ class FusionDesign(models.Model):
         readonly=True,
         help='Fusion version number'
     )
-    last_updated_by = fields.Char(
+    last_updated_by_id = fields.Many2one(
+        'fusion.user',
         string='Last Updated By',
         readonly=True,
         help='User who last updated the design in Fusion'
@@ -60,24 +79,6 @@ class FusionDesign(models.Model):
         string='Modified in Fusion',
         readonly=True,
         help='Date when the design was last modified in Fusion'
-    )
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('synced', 'Synced'),
-        ('error', 'Error')
-    ], string='Status', default='draft', required=True)
-    
-    description = fields.Text(
-        string='Description',
-        help='Design description from Fusion 360'
-    )
-    last_sync = fields.Datetime(
-        string='Last Synchronization',
-        readonly=True
-    )
-    version = fields.Char(
-        string='Version',
-        help='Design version in Fusion 360'
     )
     active = fields.Boolean(
         default=True,
@@ -109,6 +110,15 @@ class FusionDesign(models.Model):
         """Sync (create or update) a design record from Fusion 360 data"""
         if not vals.get('fusion_uuid'):
             raise ValidationError('Fusion UUID is required')
+        
+        # Handle user sync
+        if vals.get('last_updated_by'):
+            user_vals = {
+                'name': vals['last_updated_by']['name'],
+                'fusion_id': vals['last_updated_by']['id']
+            }
+            vals['last_updated_by_id'] = self.env['fusion.user'].sync_from_fusion(user_vals)
+            del vals['last_updated_by']
         
         # Search for existing design
         existing = self.search([('fusion_uuid', '=', vals['fusion_uuid'])], limit=1)

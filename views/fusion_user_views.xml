@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_fusion_user_tree" model="ir.ui.view">
+        <field name="name">fusion.user.tree</field>
+        <field name="model">fusion.user</field>
+        <field name="arch" type="xml">
+            <tree string="Fusion Users">
+                <field name="display_name"/>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="fusion_id"/>
+                <field name="partner_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_fusion_user_form" model="ir.ui.view">
+        <field name="name">fusion.user.form</field>
+        <field name="model">fusion.user</field>
+        <field name="arch" type="xml">
+            <form string="Fusion User">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options="{'terminology': 'archive'}"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="display_name" placeholder="Display Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="User Information">
+                            <field name="name"/>
+                            <field name="email" widget="email"/>
+                            <field name="fusion_id"/>
+                        </group>
+                        <group string="Odoo Integration">
+                            <field name="partner_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Modified Designs">
+                            <field name="design_ids" readonly="1">
+                                <tree>
+                                    <field name="default_code"/>
+                                    <field name="name"/>
+                                    <field name="version"/>
+                                    <field name="date_modified"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_fusion_user_search" model="ir.ui.view">
+        <field name="name">fusion.user.search</field>
+        <field name="model">fusion.user</field>
+        <field name="arch" type="xml">
+            <search string="Search Fusion Users">
+                <field name="display_name"/>
+                <field name="name"/>
+                <field name="email"/>
+                <field name="fusion_id"/>
+                <field name="partner_id"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Partner" name="group_by_partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_fusion_user" model="ir.actions.act_window">
+        <field name="name">Fusion Users</field>
+        <field name="res_model">fusion.user</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_fusion_user_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No Fusion users found
+            </p>
+            <p>
+                Users will be created automatically when syncing designs from Fusion 360.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_fusion_user"
+              name="Users"
+              parent="menu_fusion_root"
+              action="action_fusion_user"
+              sequence="20"
+              groups="group_fusion_user"/>
+</odoo>
