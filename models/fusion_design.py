@@ -15,7 +15,7 @@ class FusionDesign(models.Model):
     shared_link = fields.Many2one('fusion.shared.link', 'Shared Link')
     date_created = fields.Datetime('Date Created')
     date_modified = fields.Datetime('Date Modified')
-    product_ids = fields.One2many('fusion.product', 'fusion_design_id', string='Fusion Products')
+    product_ids = fields.One2many('product.template', 'fusion_design_id', string='Fusion Products')
     
     @api.model
     def create_or_update_from_fusion(self, fusion_data):
@@ -52,7 +52,7 @@ class FusionDesign(models.Model):
         
         # Create or update Fusion Products
         for component in fusion_data['components']:
-            product = self.env['fusion.product'].create_or_update_from_fusion(component)
+            product = self.env['product.template'].create_or_update_from_fusion(component)
             product.fusion_design_id = design.id
         
         return design

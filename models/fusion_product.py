@@ -4,7 +4,7 @@ class FusionProduct(models.Model):
     _inherit = 'product.template'
     
     fusion_uuid = fields.Char('Fusion UUID')
-    fusion_design_id = fields.Many2one('fusion.design', string='Fusion Design', ondelete='set null')
+    fusion_design_id = fields.Many2one('fusion.design', string='Fusion Design')
     
     @api.model
     def create_or_update_from_fusion(self, fusion_data):
