@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 class FusionDesign(models.Model):
     _name = 'fusion.design'
@@ -16,6 +17,20 @@ class FusionDesign(models.Model):
     date_created = fields.Datetime('Date Created')
     date_modified = fields.Datetime('Date Modified')
     product_ids = fields.One2many('product.template', 'fusion_design_id', string='Fusion Products')
+    default_code = fields.Char('Reference', readonly=True)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if not vals.get('default_code'):
+                sequence_id = int(self.env['ir.config_parameter'].sudo().get_param(
+                    'odoo_fusion.fusion_sequence_id', default=0))
+                if not sequence_id:
+                    raise ValidationError(
+                        'Please configure Fusion Design sequence in Manufacturing Settings')
+                sequence = self.env['ir.sequence'].browse(sequence_id)
+                vals['default_code'] = sequence.next_by_id()
+        return super().create(vals_list)
     
     @api.model
     def create_or_update_from_fusion(self, fusion_data):
