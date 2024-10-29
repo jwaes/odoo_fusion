@@ -4,7 +4,9 @@ from odoo.exceptions import ValidationError
 class FusionDesign(models.Model):
     _name = 'fusion.design'
     _description = 'Fusion Design'
+    _inherit = ['mail.thread']
     
+    active = fields.Boolean(default=True)
     name = fields.Char('Name', required=True)
     fusion_uuid = fields.Char('Fusion UUID', required=True)
     version = fields.Char('Version')
@@ -23,7 +25,7 @@ class FusionDesign(models.Model):
         ('draft', 'Draft'),
         ('synced', 'Synced'),
         ('error', 'Error')
-    ], string='Status', default='draft', required=True)
+    ], string='Status', default='draft', required=True, tracking=True)
     last_sync = fields.Datetime('Last Sync')
     
     # Sharing fields

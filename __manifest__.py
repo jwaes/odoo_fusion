@@ -1,12 +1,12 @@
 {
     'name': 'Odoo Fusion Integration',
-    'version': '17.0.1.0.14',
+    'version': '17.0.1.0.15',
     'category': 'Manufacturing',
     'summary': 'Integration between Odoo and Autodesk Fusion 360',
     'author': 'Jaco Tech',
     'website': 'https://jaco.tech',
     'license': 'LGPL-3',
-    'depends': ['base', 'mrp', 'product'],
+    'depends': ['base', 'mrp', 'product', 'mail'],
     'data': [
         'security/fusion_security.xml',
         'security/ir.model.access.csv',
