@@ -59,6 +59,20 @@
                         <page string="Description">
                             <field name="description"/>
                         </page>
+                        <page string="Products">
+                            <field name="product_ids" readonly="1">
+                                <tree>
+                                    <field name="default_code"/>
+                                    <field name="name"/>
+                                    <field name="fusion_version"/>
+                                    <field name="list_price"/>
+                                    <field name="standard_price"/>
+                                    <field name="qty_available"/>
+                                    <field name="virtual_available"/>
+                                    <button name="action_view_variants" type="object" string="Variants" class="btn-link"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
             </form>
