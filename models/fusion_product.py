@@ -1,7 +1,4 @@
 from odoo import models, fields, api
-import logging
-
-_logger = logging.getLogger(__name__)
 
 class FusionProductAttribute(models.Model):
     _inherit = 'product.attribute'
@@ -30,12 +27,6 @@ class FusionProduct(models.Model):
         """Create or update Odoo product from Fusion component data."""
         product = self.search([('fusion_uuid', '=', fusion_data['fusion_uuid'])], limit=1)
         
-        # Log the current name if product exists
-        if product:
-            _logger.info(f'Updating product {product.name} (UUID: {fusion_data["fusion_uuid"]})')
-            _logger.info(f'Current name: {product.name}')
-            _logger.info(f'New name from Fusion: {fusion_data["name"]}')
-        
         vals = {
             'name': fusion_data['name'],
             'fusion_uuid': fusion_data['fusion_uuid'],
@@ -47,13 +38,16 @@ class FusionProduct(models.Model):
         if not product or not product.default_code:
             vals['default_code'] = self.env['ir.sequence'].next_by_code('fusion.product.default.code')
         
+        # Get default category from settings
         if not product:
-            _logger.info(f'Creating new product with name: {fusion_data["name"]}')
+            default_category_id = int(self.env['ir.config_parameter'].sudo().get_param('odoo_fusion.default_category_id', '0'))
+            if default_category_id:
+                vals['categ_id'] = default_category_id
+        
+        if not product:
             product = self.create(vals)
         else:
-            _logger.info(f'Updating product with new values: {vals}')
             product.write(vals)
-            _logger.info(f'Updated product name to: {product.name}')
             
         # Handle configurations as product variants
         if fusion_data.get('is_configuration') and fusion_data.get('configurations'):

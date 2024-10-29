@@ -32,6 +32,18 @@
                                 </div>
                             </div>
                         </setting>
+                        <setting id="fusion_product_category_setting" 
+                                title="Configure default product category"
+                                help="This category will be used as default for new products created from Fusion components">
+                            <field name="fusion_default_category_id"/>
+                            <div class="content-group">
+                                <div class="mt8">
+                                    <p class="text-muted">
+                                        The category will be automatically set when creating new products from Fusion 360 components
+                                    </p>
+                                </div>
+                            </div>
+                        </setting>
                     </block>
                 </app>
             </field>
