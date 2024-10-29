@@ -1,11 +1,26 @@
 from odoo import models, fields, api
 
+class FusionProductAttribute(models.Model):
+    _inherit = 'product.attribute'
+    
+    is_fusion_attribute = fields.Boolean('Created from Fusion', default=False, readonly=True)
+
 class FusionProduct(models.Model):
     _inherit = 'product.template'
     
     fusion_uuid = fields.Char('Fusion UUID')
     fusion_design_id = fields.Many2one('fusion.design', string='Fusion Design')
     fusion_version = fields.Integer('Fusion Version')
+    
+    def action_view_variants(self):
+        self.ensure_one()
+        action = self.env.ref('product.product_variant_action').read()[0]
+        action['domain'] = [('product_tmpl_id', '=', self.id)]
+        action['context'] = {
+            'default_product_tmpl_id': self.id,
+            'create': False
+        }
+        return action
     
     @api.model
     def create_or_update_from_fusion(self, fusion_data):
@@ -36,7 +51,8 @@ class FusionProduct(models.Model):
             if not config_attr:
                 config_attr = self.env['product.attribute'].create({
                     'name': 'Configuration',
-                    'create_variant': 'always'
+                    'create_variant': 'always',
+                    'is_fusion_attribute': True
                 })
             
             # Create attribute values for each configuration

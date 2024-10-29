@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="fusion_product_attribute_tree_view" model="ir.ui.view">
+        <field name="name">product.attribute.fusion.tree.inherit</field>
+        <field name="model">product.attribute</field>
+        <field name="inherit_id" ref="product.attribute_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="is_fusion_attribute"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="fusion_product_attribute_form_view" model="ir.ui.view">
+        <field name="name">product.attribute.fusion.form.inherit</field>
+        <field name="model">product.attribute</field>
+        <field name="inherit_id" ref="product.product_attribute_view_form"/>
+        <field name="arch" type="xml">
+            <field name="create_variant" position="after">
+                <field name="is_fusion_attribute"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="fusion_product_attribute_search_view" model="ir.ui.view">
+        <field name="name">product.attribute.fusion.search.inherit</field>
+        <field name="model">product.attribute</field>
+        <field name="inherit_id" ref="product.product_attribute_view_search"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <filter string="Fusion Attributes" name="fusion_attributes" domain="[('is_fusion_attribute', '=', True)]"/>
+            </field>
+        </field>
+    </record>
+</odoo>
