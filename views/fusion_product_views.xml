@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
             <xpath expr="//notebook" position="inside">
-                <page string="Fusion" attrs="{'invisible': [('fusion_uuid', '=', False)]}">
+                <page string="Fusion" invisible="not fusion_uuid">
                     <group>
                         <field name="fusion_uuid" readonly="1"/>
                         <field name="fusion_design_id"/>
