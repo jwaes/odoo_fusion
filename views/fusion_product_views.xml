@@ -1,18 +1,49 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <record id="fusion_product_template_form_view" model="ir.ui.view">
-        <field name="name">fusion.product.template.form</field>
+    <record id="fusion_product_form_view" model="ir.ui.view">
+        <field name="name">product.template.fusion.form.inherit</field>
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
-            <notebook position="inside">
-                <page string="Fusion" name="fusion">
+            <xpath expr="//notebook" position="inside">
+                <page string="Fusion" attrs="{'invisible': [('fusion_uuid', '=', False)]}">
                     <group>
-                        <field name="fusion_uuid"/>
+                        <field name="fusion_uuid" readonly="1"/>
                         <field name="fusion_design_id"/>
+                        <field name="fusion_version"/>
                     </group>
                 </page>
-            </notebook>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="fusion_product_tree_view" model="ir.ui.view">
+        <field name="name">product.template.fusion.tree.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="fusion_version" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="fusion_product_search_view" model="ir.ui.view">
+        <field name="name">product.template.fusion.search.inherit</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_search_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="fusion_uuid"/>
+                <field name="fusion_version"/>
+            </field>
+            <filter name="consumable" position="after">
+                <separator/>
+                <filter string="Fusion Products" name="fusion_products" domain="[('fusion_uuid', '!=', False)]"/>
+            </filter>
+            <group position="inside">
+                <filter string="Fusion Version" name="group_by_fusion_version" context="{'group_by': 'fusion_version'}"/>
+            </group>
         </field>
     </record>
 </odoo>

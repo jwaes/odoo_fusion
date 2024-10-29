@@ -36,7 +36,7 @@
                     </div>
                     <group>
                         <group string="Fusion Information">
-                            <field name="fusion_uuid"/>
+                            <field name="fusion_uuid" readonly="1"/>
                             <field name="version_id"/>
                             <field name="version_number"/>
                             <field name="last_updated_by_id"/>

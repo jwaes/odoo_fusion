@@ -5,6 +5,7 @@ class FusionProduct(models.Model):
     
     fusion_uuid = fields.Char('Fusion UUID')
     fusion_design_id = fields.Many2one('fusion.design', string='Fusion Design')
+    fusion_version = fields.Integer('Fusion Version')
     
     @api.model
     def create_or_update_from_fusion(self, fusion_data):
@@ -15,6 +16,7 @@ class FusionProduct(models.Model):
             'name': fusion_data['name'],
             'fusion_uuid': fusion_data['fusion_uuid'],
             'description': fusion_data['description'],
+            'fusion_version': fusion_data.get('version_number'),
         }
         
         # Only set default_code if it doesn't exist yet
