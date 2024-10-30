@@ -1,6 +1,6 @@
 {
     'name': 'Odoo Fusion Integration',
-    'version': '17.0.1.0.53',
+    'version': '17.0.1.0.55',
     'category': 'Manufacturing',
     'summary': 'Integration between Odoo and Autodesk Fusion 360',
     'author': 'Jaco Tech',
@@ -10,7 +10,6 @@
     'data': [
         'security/fusion_security.xml',
         'security/ir.model.access.csv',
-        'views/fusion_design_views.xml',
         'views/fusion_product_views.xml',
         'views/fusion_user_views.xml',
         'views/fusion_attribute_views.xml',

@@ -22,9 +22,16 @@ class FusionProduct(models.Model):
     _inherit = 'product.template'
     
     fusion_uuid = fields.Char('Fusion UUID')
-    fusion_design_id = fields.Many2one('fusion.design', string='Fusion Design')
     fusion_version = fields.Integer('Fusion Version')
     fusion_generated_default_code = fields.Char('Fusion Generated Default Code', readonly=True, copy=False)
+    fusion_web_url = fields.Char('Fusion Web URL', readonly=True)
+    fusion_shared_link_active = fields.Boolean('Fusion Shared Link Active', readonly=True)
+    fusion_shared_link_url = fields.Char('Fusion Shared Link URL', readonly=True)
+    fusion_shared_link_download = fields.Boolean('Fusion Shared Link Download', readonly=True)
+    fusion_date_created = fields.Datetime('Fusion Created Date', readonly=True)
+    fusion_date_modified = fields.Datetime('Fusion Modified Date', readonly=True)
+    fusion_last_sync = fields.Datetime('Last Fusion Sync', readonly=True)
+    fusion_last_updated_by_id = fields.Many2one('fusion.user', string='Last Updated By', readonly=True)
 
     def action_view_variants(self):
         self.ensure_one()
@@ -47,7 +54,19 @@ class FusionProduct(models.Model):
             'fusion_uuid': fusion_data['fusion_uuid'],
             'description': fusion_data['description'],
             'fusion_version': fusion_data.get('version_number'),
+            'fusion_web_url': fusion_data['fusion_web_url'],
+            'fusion_date_created': fusion_data['date_created'],
+            'fusion_date_modified': fusion_data['date_modified'],
+            'fusion_last_sync': fields.Datetime.now(),
         }
+
+        # Handle shared link data
+        shared_link = fusion_data.get('shared_link', {})
+        vals.update({
+            'fusion_shared_link_active': shared_link.get('is_shared', False),
+            'fusion_shared_link_url': shared_link.get('url', ''),
+            'fusion_shared_link_download': shared_link.get('allow_download', False),
+        })
         
         # Generate and store the default code
         if not product or not product.fusion_generated_default_code:
