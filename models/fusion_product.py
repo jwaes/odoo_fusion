@@ -8,6 +8,15 @@ class FusionProductAttribute(models.Model):
     
     is_fusion_attribute = fields.Boolean('Created from Fusion', default=False, readonly=True)
 
+class FusionProductAttributeValue(models.Model):
+    _inherit = 'product.attribute.value'
+    
+    fusion_uuid = fields.Char('Fusion UUID')
+    
+    _sql_constraints = [
+        ('fusion_uuid_uniq', 'unique(fusion_uuid)', 'Fusion UUID must be unique!')
+    ]
+
 class FusionProduct(models.Model):
     _inherit = 'product.template'
     
@@ -78,17 +87,24 @@ class FusionProduct(models.Model):
             value_ids = []
             
             for config in fusion_data['configurations']:
+                # Search by Fusion UUID instead of name
                 value = attr_vals.search([
-                    ('name', '=', config['name']),
+                    ('fusion_uuid', '=', config['fusion_uuid']),
                     ('attribute_id', '=', config_attr.id)
                 ], limit=1)
                 
                 if not value:
                     value = attr_vals.create({
                         'name': config['name'],
+                        'fusion_uuid': config['fusion_uuid'],
                         'attribute_id': config_attr.id
                     })
-                    _logger.info(f"Created attribute value: {config['name']}")
+                    _logger.info(f"Created attribute value: {config['name']} (UUID: {config['fusion_uuid']})")
+                else:
+                    # Update name if it changed in Fusion
+                    if value.name != config['name']:
+                        value.write({'name': config['name']})
+                        _logger.info(f"Updated attribute value name from {value.name} to {config['name']}")
                 
                 value_ids.append(value.id)
             
