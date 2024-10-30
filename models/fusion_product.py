@@ -87,10 +87,11 @@ class FusionProduct(models.Model):
             value_ids = []
             
             for config in fusion_data['configurations']:
-                # Search by Fusion UUID instead of name
-                value = attr_vals.search([
+                # Search by Fusion UUID and company
+                value = attr_vals.with_context(active_test=False).search([
                     ('fusion_uuid', '=', config['fusion_uuid']),
-                    ('attribute_id', '=', config_attr.id)
+                    ('attribute_id', '=', config_attr.id),
+                    ('company_id', '=', self.env.company.id)
                 ], limit=1)
                 
                 if not value:
