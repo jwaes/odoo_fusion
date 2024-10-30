@@ -1,4 +1,7 @@
 from odoo import models, fields, api
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class FusionProductAttribute(models.Model):
     _inherit = 'product.attribute'
@@ -25,6 +28,7 @@ class FusionProduct(models.Model):
     @api.model
     def create_or_update_from_fusion(self, fusion_data):
         """Create or update Odoo product from Fusion component data."""
+        _logger.info(f"Processing Fusion component: {fusion_data['name']}")
         product = self.search([('fusion_uuid', '=', fusion_data['fusion_uuid'])], limit=1)
         
         vals = {
@@ -45,53 +49,110 @@ class FusionProduct(models.Model):
                 vals['categ_id'] = default_category_id
         
         if not product:
+            _logger.info("Creating new product")
             product = self.create(vals)
         else:
+            _logger.info(f"Updating existing product: {product.name}")
             product.write(vals)
             
-        # Handle configurations as product variants
+        # Handle configurations
         if fusion_data.get('is_configuration') and fusion_data.get('configurations'):
-            # Create product attributes if needed
-            attr_vals = self.env['product.attribute.value']
-            config_attr = self.env['product.attribute'].search([('name', '=', 'Configuration')], limit=1)
+            _logger.info(f"Processing configurations: {len(fusion_data['configurations'])}")
+            
+            # Create or get configuration attribute
+            config_attr = self.env['product.attribute'].search([
+                ('name', '=', 'Configuration'),
+                ('is_fusion_attribute', '=', True)
+            ], limit=1)
+            
             if not config_attr:
                 config_attr = self.env['product.attribute'].create({
                     'name': 'Configuration',
                     'create_variant': 'always',
                     'is_fusion_attribute': True
                 })
+                _logger.info("Created Configuration attribute")
             
             # Create attribute values for each configuration
+            attr_vals = self.env['product.attribute.value']
+            value_ids = []
+            
             for config in fusion_data['configurations']:
                 value = attr_vals.search([
                     ('name', '=', config['name']),
                     ('attribute_id', '=', config_attr.id)
                 ], limit=1)
+                
                 if not value:
                     value = attr_vals.create({
                         'name': config['name'],
                         'attribute_id': config_attr.id
                     })
+                    _logger.info(f"Created attribute value: {config['name']}")
                 
-                # Create or update product variant
-                variant = self.env['product.product'].search([
-                    ('product_tmpl_id', '=', product.id),
-                    ('product_template_attribute_value_ids.product_attribute_value_id', '=', value.id)
-                ], limit=1)
-                
-                if not variant:
-                    # Create product attribute line if needed
-                    attr_line = self.env['product.template.attribute.line'].search([
-                        ('product_tmpl_id', '=', product.id),
-                        ('attribute_id', '=', config_attr.id)
+                value_ids.append(value.id)
+            
+            # Create or update product attribute line
+            attr_line = self.env['product.template.attribute.line'].search([
+                ('product_tmpl_id', '=', product.id),
+                ('attribute_id', '=', config_attr.id)
+            ], limit=1)
+            
+            if not attr_line:
+                attr_line = self.env['product.template.attribute.line'].create({
+                    'product_tmpl_id': product.id,
+                    'attribute_id': config_attr.id,
+                    'value_ids': [(6, 0, value_ids)]
+                })
+                _logger.info("Created attribute line")
+            else:
+                attr_line.write({
+                    'value_ids': [(6, 0, value_ids)]
+                })
+                _logger.info("Updated attribute line")
+            
+            # Create parameter attributes for the first configuration
+            if fusion_data['configurations'] and 'parameters' in fusion_data['configurations'][0]:
+                for param_name, param_data in fusion_data['configurations'][0]['parameters'].items():
+                    param_attr = self.env['product.attribute'].search([
+                        ('name', '=', param_name),
+                        ('is_fusion_attribute', '=', True)
                     ], limit=1)
-                    if not attr_line:
-                        attr_line = self.env['product.template.attribute.line'].create({
+                    
+                    if not param_attr:
+                        param_attr = self.env['product.attribute'].create({
+                            'name': param_name,
+                            'create_variant': 'no_variant',
+                            'is_fusion_attribute': True
+                        })
+                        _logger.info(f"Created parameter attribute: {param_name}")
+                    
+                    # Create or update parameter value
+                    param_line = self.env['product.template.attribute.line'].search([
+                        ('product_tmpl_id', '=', product.id),
+                        ('attribute_id', '=', param_attr.id)
+                    ], limit=1)
+                    
+                    param_value = self.env['product.attribute.value'].search([
+                        ('name', '=', str(param_data['value'])),
+                        ('attribute_id', '=', param_attr.id)
+                    ], limit=1)
+                    
+                    if not param_value:
+                        param_value = self.env['product.attribute.value'].create({
+                            'name': str(param_data['value']),
+                            'attribute_id': param_attr.id
+                        })
+                    
+                    if not param_line:
+                        param_line = self.env['product.template.attribute.line'].create({
                             'product_tmpl_id': product.id,
-                            'attribute_id': config_attr.id,
-                            'value_ids': [(4, value.id)]
+                            'attribute_id': param_attr.id,
+                            'value_ids': [(4, param_value.id)]
                         })
                     else:
-                        attr_line.write({'value_ids': [(4, value.id)]})
+                        param_line.write({
+                            'value_ids': [(6, 0, [param_value.id])]
+                        })
         
         return product
