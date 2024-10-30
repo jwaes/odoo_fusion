@@ -91,6 +91,20 @@ class FusionDesign(models.Model):
             _logger.info(f"Updating existing design: {design.name}")
             design.write(vals)
         
+        # Get current fusion UUIDs from the design data
+        current_fusion_uuids = {comp['fusion_uuid'] for comp in fusion_data.get('components', [])}
+        
+        # Get existing products linked to this design
+        existing_products = self.env['product.template'].search([
+            ('fusion_design_id', '=', design.id)
+        ])
+        
+        # Unlink products that are no longer in the design
+        for product in existing_products:
+            if product.fusion_uuid not in current_fusion_uuids:
+                _logger.info(f"Unlinking product {product.name} as it's no longer in the design")
+                product.fusion_design_id = False
+        
         # Process components
         for component_data in fusion_data.get('components', []):
             _logger.info(f"Processing component: {component_data['name']}")
