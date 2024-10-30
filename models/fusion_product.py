@@ -141,8 +141,8 @@ class FusionProduct(models.Model):
         
         if not config_row_id:
             # If no configuration row ID is provided, check if there's only one variant
-            if len(product_tmpl.product_variant_ids) == 1:
-                return product_tmpl.product_variant_ids
+            if product_tmpl.product_variant_count == 1:
+                return product_tmpl.product_variant_ids.id
             else:
                 _logger.warning("Multiple variants found for a non-configured component. This is unexpected.")
                 return None
@@ -166,4 +166,4 @@ class FusionProduct(models.Model):
             _logger.info("Product variant not found")
             return None
         
-        return product_variant
+        return product_variant.id
