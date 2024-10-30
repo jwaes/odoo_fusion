@@ -110,49 +110,5 @@ class FusionProduct(models.Model):
                     'value_ids': [(6, 0, value_ids)]
                 })
                 _logger.info("Updated attribute line")
-            
-            # Create parameter attributes for the first configuration
-            if fusion_data['configurations'] and 'parameters' in fusion_data['configurations'][0]:
-                for param_name, param_data in fusion_data['configurations'][0]['parameters'].items():
-                    param_attr = self.env['product.attribute'].search([
-                        ('name', '=', param_name),
-                        ('is_fusion_attribute', '=', True)
-                    ], limit=1)
-                    
-                    if not param_attr:
-                        param_attr = self.env['product.attribute'].create({
-                            'name': param_name,
-                            'create_variant': 'no_variant',
-                            'is_fusion_attribute': True
-                        })
-                        _logger.info(f"Created parameter attribute: {param_name}")
-                    
-                    # Create or update parameter value
-                    param_line = self.env['product.template.attribute.line'].search([
-                        ('product_tmpl_id', '=', product.id),
-                        ('attribute_id', '=', param_attr.id)
-                    ], limit=1)
-                    
-                    param_value = self.env['product.attribute.value'].search([
-                        ('name', '=', str(param_data['value'])),
-                        ('attribute_id', '=', param_attr.id)
-                    ], limit=1)
-                    
-                    if not param_value:
-                        param_value = self.env['product.attribute.value'].create({
-                            'name': str(param_data['value']),
-                            'attribute_id': param_attr.id
-                        })
-                    
-                    if not param_line:
-                        param_line = self.env['product.template.attribute.line'].create({
-                            'product_tmpl_id': product.id,
-                            'attribute_id': param_attr.id,
-                            'value_ids': [(4, param_value.id)]
-                        })
-                    else:
-                        param_line.write({
-                            'value_ids': [(6, 0, [param_value.id])]
-                        })
         
         return product
