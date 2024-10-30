@@ -17,6 +17,7 @@ class MrpBom(models.Model):
         # Prepare BoM values
         vals = {
             'product_id': product_id,
+            'product_tmpl_id': product_id.product_tmpl_id.id,  # Add product_tmpl_id
             'type': 'normal',
             'bom_line_ids': bom_lines
         }
