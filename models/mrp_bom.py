@@ -11,13 +11,16 @@ class MrpBom(models.Model):
         """Create or update BoM from Fusion data."""
         _logger.info(f"Creating/updating BoM for product ID: {product_id}")
         
+        # Convert product_id to recordset
+        product = self.env['product.product'].browse(product_id)
+        
         # Find existing BoM for this product
         bom = self.search([('product_id', '=', product_id)], limit=1)
         
         # Prepare BoM values
         vals = {
             'product_id': product_id,
-            'product_tmpl_id': product_id.product_tmpl_id.id,  # Add product_tmpl_id
+            'product_tmpl_id': product.product_tmpl_id.id,  # Access product_tmpl_id from recordset
             'type': 'normal',
             'bom_line_ids': bom_lines
         }
