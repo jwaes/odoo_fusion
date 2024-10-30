@@ -128,3 +128,42 @@ class FusionProduct(models.Model):
                 _logger.info("Updated attribute line")
         
         return product
+    
+    @api.model
+    def get_product_variant_by_uuid(self, fusion_uuid, config_row_id=None):
+        """Get the product variant based on Fusion UUID and configuration row ID."""
+        _logger.info(f"Getting product variant for UUID: {fusion_uuid}, Config Row ID: {config_row_id}")
+        
+        product_tmpl = self.search([('fusion_uuid', '=', fusion_uuid)], limit=1)
+        if not product_tmpl:
+            _logger.info("Product template not found")
+            return None
+        
+        if not config_row_id:
+            # If no configuration row ID is provided, check if there's only one variant
+            if len(product_tmpl.product_variant_ids) == 1:
+                return product_tmpl.product_variant_ids
+            else:
+                _logger.warning("Multiple variants found for a non-configured component. This is unexpected.")
+                return None
+        
+        # Find the attribute value matching the configuration row ID
+        attr_value = self.env['product.attribute.value'].search([
+            ('fusion_uuid', '=', config_row_id)
+        ], limit=1)
+        
+        if not attr_value:
+            _logger.info("Attribute value not found")
+            return None
+        
+        # Find the product variant with the matching attribute value
+        product_variant = self.env['product.product'].search([
+            ('product_tmpl_id', '=', product_tmpl.id),
+            ('product_template_variant_value_ids', '=', attr_value.id)
+        ], limit=1)
+        
+        if not product_variant:
+            _logger.info("Product variant not found")
+            return None
+        
+        return product_variant
