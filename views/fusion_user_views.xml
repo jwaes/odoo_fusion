@@ -68,7 +68,13 @@
         </field>
     </record>
 
-    <!-- Menu Item -->
+    <!-- Menu Items -->
+    <menuitem id="menu_fusion_root"
+              name="Fusion"
+              parent="mrp.menu_mrp_root"
+              sequence="50"
+              groups="group_fusion_user"/>
+
     <menuitem id="menu_fusion_user"
               name="Users"
               parent="menu_fusion_root"
