@@ -1,5 +1,6 @@
 from odoo import models, fields, api
 import logging
+import re
 
 _logger = logging.getLogger(__name__)
 
@@ -23,7 +24,8 @@ class FusionProduct(models.Model):
     fusion_uuid = fields.Char('Fusion UUID')
     fusion_design_id = fields.Many2one('fusion.design', string='Fusion Design')
     fusion_version = fields.Integer('Fusion Version')
-    
+    fusion_generated_default_code = fields.Char('Fusion Generated Default Code', readonly=True, copy=False)
+
     def action_view_variants(self):
         self.ensure_one()
         action = self.env.ref('product.product_variant_action').read()[0]
@@ -47,9 +49,9 @@ class FusionProduct(models.Model):
             'fusion_version': fusion_data.get('version_number'),
         }
         
-        # Only set default_code if it doesn't exist yet
-        if not product or not product.default_code:
-            vals['default_code'] = self.env['ir.sequence'].next_by_code('fusion.product.default.code')
+        # Generate and store the default code
+        if not product or not product.fusion_generated_default_code:
+            vals['fusion_generated_default_code'] = self.env['ir.sequence'].next_by_code('fusion.product.default.code')
         
         # Get default category from settings
         if not product:
@@ -63,7 +65,11 @@ class FusionProduct(models.Model):
         else:
             _logger.info(f"Updating existing product: {product.name}")
             product.write(vals)
-            
+
+        # Set default_code for single-variant products
+        if product.product_variant_count == 1:
+            product.product_variant_ids.default_code = product.fusion_generated_default_code
+        
         # Handle configurations
         if fusion_data.get('is_configuration') and fusion_data.get('configurations'):
             _logger.info(f"Processing configurations: {len(fusion_data['configurations'])}")
@@ -126,6 +132,13 @@ class FusionProduct(models.Model):
                     'value_ids': [(6, 0, value_ids)]
                 })
                 _logger.info("Updated attribute line")
+
+            # Generate default_code for variants
+            for variant in product.product_variant_ids:
+                config_name = variant.product_template_attribute_value_ids.filtered(
+                    lambda v: v.attribute_id == config_attr
+                ).name
+                variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', config_name)}"
         
         return product
     
