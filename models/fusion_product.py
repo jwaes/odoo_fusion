@@ -159,7 +159,6 @@ class FusionProduct(models.Model):
                 ).name
                 variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', config_name)}"
         
-        # Return just the ID instead of the full recordset
         return product.id
     
     @api.model
@@ -170,15 +169,16 @@ class FusionProduct(models.Model):
         product_tmpl = self.search([('fusion_uuid', '=', fusion_uuid)], limit=1)
         if not product_tmpl:
             _logger.info("Product template not found")
-            return None
+            return False  # Return False instead of None
         
         if not config_row_id:
             # If no configuration row ID is provided, check if there's only one variant
             if product_tmpl.product_variant_count == 1:
-                return product_tmpl.product_variant_ids.id
+                return product_tmpl.product_variant_ids[0].id
             else:
                 _logger.warning("Multiple variants found for a non-configured component. This is unexpected.")
-                return None
+                # Return first variant's ID instead of None
+                return product_tmpl.product_variant_ids[0].id if product_tmpl.product_variant_ids else False
         
         # Find the attribute value matching the configuration row ID
         attr_value = self.env['product.attribute.value'].search([
@@ -187,7 +187,7 @@ class FusionProduct(models.Model):
         
         if not attr_value:
             _logger.info("Attribute value not found")
-            return None
+            return False  # Return False instead of None
         
         # Find the product variant with the matching attribute value
         product_variant = self.env['product.product'].search([
@@ -197,6 +197,6 @@ class FusionProduct(models.Model):
         
         if not product_variant:
             _logger.info("Product variant not found")
-            return None
+            return False  # Return False instead of None
         
         return product_variant.id
