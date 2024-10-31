@@ -90,8 +90,8 @@ class FusionProduct(models.Model):
             product.product_variant_ids.default_code = product.fusion_generated_default_code
         
         # Handle configurations
-        if fusion_data.get('is_configuration') and fusion_data.get('configurations'):
-            _logger.info(f"Processing configurations: {len(fusion_data['configurations'])}")
+        if fusion_data.get('is_configuration'):
+            _logger.info(f"Processing configuration instance with ID: {fusion_data['configuration_id']}")
             
             # Create or get configuration attribute
             config_attr = self.env['product.attribute'].search([
@@ -107,31 +107,20 @@ class FusionProduct(models.Model):
                 })
                 _logger.info("Created Configuration attribute")
             
-            # Create attribute values for each configuration
+            # Create or get attribute value for this configuration
             attr_vals = self.env['product.attribute.value']
-            value_ids = []
+            value = attr_vals.with_context(active_test=False).search([
+                ('fusion_uuid', '=', fusion_data['configuration_id']),
+                ('attribute_id', '=', config_attr.id)
+            ], limit=1)
             
-            for config in fusion_data['configurations']:
-                # Search by Fusion UUID without company
-                value = attr_vals.with_context(active_test=False).search([
-                    ('fusion_uuid', '=', config['fusion_uuid']),
-                    ('attribute_id', '=', config_attr.id)
-                ], limit=1)
-                
-                if not value:
-                    value = attr_vals.create({
-                        'name': config['name'],
-                        'fusion_uuid': config['fusion_uuid'],
-                        'attribute_id': config_attr.id
-                    })
-                    _logger.info(f"Created attribute value: {config['name']} (UUID: {config['fusion_uuid']})")
-                else:
-                    # Update name if it changed in Fusion
-                    if value.name != config['name']:
-                        value.write({'name': config['name']})
-                        _logger.info(f"Updated attribute value name from {value.name} to {config['name']}")
-                
-                value_ids.append(value.id)
+            if not value:
+                value = attr_vals.create({
+                    'name': fusion_data['name'],
+                    'fusion_uuid': fusion_data['configuration_id'],
+                    'attribute_id': config_attr.id
+                })
+                _logger.info(f"Created configuration value: {fusion_data['name']} (UUID: {fusion_data['configuration_id']})")
             
             # Create or update product attribute line
             attr_line = self.env['product.template.attribute.line'].search([
@@ -143,21 +132,24 @@ class FusionProduct(models.Model):
                 attr_line = self.env['product.template.attribute.line'].create({
                     'product_tmpl_id': product.id,
                     'attribute_id': config_attr.id,
-                    'value_ids': [(6, 0, value_ids)]
+                    'value_ids': [(6, 0, [value.id])]
                 })
                 _logger.info("Created attribute line")
             else:
-                attr_line.write({
-                    'value_ids': [(6, 0, value_ids)]
-                })
-                _logger.info("Updated attribute line")
+                current_values = attr_line.value_ids.ids
+                if value.id not in current_values:
+                    attr_line.write({
+                        'value_ids': [(4, value.id)]
+                    })
+                    _logger.info(f"Added configuration value to attribute line: {value.name}")
 
-            # Generate default_code for variants
-            for variant in product.product_variant_ids:
-                config_name = variant.product_template_attribute_value_ids.filtered(
-                    lambda v: v.attribute_id == config_attr
-                ).name
-                variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', config_name)}"
+            # Generate default_code for this variant
+            variant = product.product_variant_ids.filtered(
+                lambda v: value in v.product_template_attribute_value_ids.product_attribute_value_id
+            )
+            if variant:
+                variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', value.name)}"
+                _logger.info(f"Set variant default_code: {variant.default_code}")
         
         return product.id
     
@@ -169,15 +161,15 @@ class FusionProduct(models.Model):
         product_tmpl = self.search([('fusion_uuid', '=', fusion_uuid)], limit=1)
         if not product_tmpl:
             _logger.info("Product template not found")
-            return False  # Return False instead of None
+            return False
         
         if not config_row_id:
             # If no configuration row ID is provided, check if there's only one variant
             if product_tmpl.product_variant_count == 1:
+                _logger.info(f"Found single variant for {product_tmpl.name}")
                 return product_tmpl.product_variant_ids[0].id
             else:
-                _logger.warning("Multiple variants found for a non-configured component. This is unexpected.")
-                # Return first variant's ID instead of None
+                _logger.warning(f"Multiple variants ({product_tmpl.product_variant_count}) found for {product_tmpl.name}. Using first variant.")
                 return product_tmpl.product_variant_ids[0].id if product_tmpl.product_variant_ids else False
         
         # Find the attribute value matching the configuration row ID
@@ -186,17 +178,27 @@ class FusionProduct(models.Model):
         ], limit=1)
         
         if not attr_value:
-            _logger.info("Attribute value not found")
-            return False  # Return False instead of None
+            _logger.info(f"Configuration value not found for ID: {config_row_id}")
+            # Log existing attribute values for debugging
+            existing_values = self.env['product.attribute.value'].search([('fusion_uuid', '!=', False)])
+            _logger.info("Available configuration values:")
+            for val in existing_values:
+                _logger.info(f"  Name: {val.name}, UUID: {val.fusion_uuid}, Attribute: {val.attribute_id.name}")
+            return False
         
         # Find the product variant with the matching attribute value
-        product_variant = self.env['product.product'].search([
-            ('product_tmpl_id', '=', product_tmpl.id),
-            ('product_template_variant_value_ids', '=', attr_value.id)
-        ], limit=1)
+        variant = product_tmpl.product_variant_ids.filtered(
+            lambda v: attr_value in v.product_template_attribute_value_ids.product_attribute_value_id
+        )
         
-        if not product_variant:
-            _logger.info("Product variant not found")
-            return False  # Return False instead of None
+        if not variant:
+            _logger.info(f"No variant found with configuration: {attr_value.name}")
+            # Log available variants for debugging
+            _logger.info(f"Available variants for {product_tmpl.name}:")
+            for var in product_tmpl.product_variant_ids:
+                config_values = var.product_template_attribute_value_ids.product_attribute_value_id
+                _logger.info(f"  Variant ID: {var.id}, Configuration values: {config_values.mapped('name')}")
+            return False
         
-        return product_variant.id
+        _logger.info(f"Found variant with configuration: {attr_value.name}")
+        return variant[0].id if variant else False
