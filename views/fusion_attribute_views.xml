@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Tree View -->
+    <!-- Attribute Tree View -->
     <record id="fusion_product_attribute_tree_view" model="ir.ui.view">
         <field name="name">product.attribute.fusion.tree.inherit</field>
         <field name="model">product.attribute</field>
@@ -12,7 +12,7 @@
         </field>
     </record>
 
-    <!-- Form View -->
+    <!-- Attribute Form View -->
     <record id="fusion_product_attribute_form_view" model="ir.ui.view">
         <field name="name">product.attribute.fusion.form.inherit</field>
         <field name="model">product.attribute</field>
@@ -31,10 +31,7 @@
         <field name="inherit_id" ref="product.attribute_tree_view"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
-                <field name="fusion_uuid" 
-                       invisible="not attribute_id.is_fusion_attribute"
-                       readonly="1"
-                       groups="base.group_no_one"/>
+                <field name="fusion_uuid" groups="base.group_no_one"/>
             </field>
         </field>
     </record>
