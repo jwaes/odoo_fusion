@@ -32,7 +32,8 @@
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="fusion_uuid" 
-                       attrs="{'invisible': [('attribute_id.is_fusion_attribute', '=', False)], 'readonly': True}"
+                       invisible="not attribute_id.is_fusion_attribute"
+                       readonly="1"
                        groups="base.group_no_one"/>
             </field>
         </field>
@@ -46,7 +47,8 @@
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="fusion_uuid" 
-                       attrs="{'invisible': [('attribute_id.is_fusion_attribute', '=', False)], 'readonly': True}"
+                       invisible="not attribute_id.is_fusion_attribute"
+                       readonly="1"
                        groups="base.group_no_one"/>
             </field>
         </field>
