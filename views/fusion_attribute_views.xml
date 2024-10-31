@@ -24,11 +24,11 @@
         </field>
     </record>
 
-    <!-- Attribute Value Tree View -->
-    <record id="fusion_product_attribute_value_tree_view" model="ir.ui.view">
-        <field name="name">product.attribute.value.fusion.tree.inherit</field>
-        <field name="model">product.attribute.value</field>
-        <field name="inherit_id" ref="product.variants_tree_view"/>
+    <!-- Template Attribute Value Tree View -->
+    <record id="fusion_product_template_attribute_value_tree_view" model="ir.ui.view">
+        <field name="name">product.template.attribute.value.fusion.tree.inherit</field>
+        <field name="model">product.template.attribute.value</field>
+        <field name="inherit_id" ref="product.product_template_attribute_value_view_tree"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="fusion_uuid" 
@@ -39,11 +39,11 @@
         </field>
     </record>
 
-    <!-- Attribute Value Form View -->
-    <record id="fusion_product_attribute_value_form_view" model="ir.ui.view">
-        <field name="name">product.attribute.value.fusion.form.inherit</field>
-        <field name="model">product.attribute.value</field>
-        <field name="inherit_id" ref="product.product_attribute_value_view_form"/>
+    <!-- Template Attribute Value Form View -->
+    <record id="fusion_product_template_attribute_value_form_view" model="ir.ui.view">
+        <field name="name">product.template.attribute.value.fusion.form.inherit</field>
+        <field name="model">product.template.attribute.value</field>
+        <field name="inherit_id" ref="product.product_template_attribute_value_view_form"/>
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="fusion_uuid" 
