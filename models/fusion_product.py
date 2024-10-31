@@ -159,7 +159,8 @@ class FusionProduct(models.Model):
                 ).name
                 variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', config_name)}"
         
-        return product
+        # Return just the ID instead of the full recordset
+        return product.id
     
     @api.model
     def get_product_variant_by_uuid(self, fusion_uuid, config_row_id=None):
