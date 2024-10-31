@@ -27,8 +27,8 @@ The module will:
 4. Remove components that are no longer in the assembly
 """
 
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo import models, fields, api
+from odoo.exceptions import UserError, ValidationError
 import logging
 
 _logger = logging.getLogger(__name__)
@@ -36,33 +36,7 @@ _logger = logging.getLogger(__name__)
 class MrpBom(models.Model):
     _inherit = 'mrp.bom'
 
-    @api.model
-    def create_or_update_from_fusion(self, product_id, bom_lines):
-        """Create or update BoM from Fusion data."""
-        _logger.info(f"Creating/updating BoM for product ID: {product_id}")
-        
-        # Convert product_id to recordset
-        product = self.env['product.product'].browse(product_id)
-        
-        # Find existing BoM for this product
-        bom = self.search([('product_id', '=', product_id)], limit=1)
-        
-        # Prepare BoM values
-        vals = {
-            'product_id': product_id,
-            'product_tmpl_id': product.product_tmpl_id.id,  # Access product_tmpl_id from recordset
-            'type': 'normal',
-            'bom_line_ids': bom_lines
-        }
-        
-        if not bom:
-            _logger.info("Creating new BoM")
-            bom = self.create(vals)
-        else:
-            _logger.info("Updating existing BoM")
-            bom.write(vals)
-        
-        return bom.id
+
 
     @api.model
     def sync_from_fusion(self, product_tmpl_id, structure):
@@ -96,6 +70,13 @@ class MrpBom(models.Model):
             }
         """
         try:
+            # Validate product template exists
+            product = self.env['product.template'].browse(product_tmpl_id)
+            if not product.exists():
+                raise ValidationError(f"Product template with ID {product_tmpl_id} does not exist")
+            
+            _logger.info(f"Syncing BOM for product: {product.name} (ID: {product_tmpl_id})")
+
             # Find or create BOM
             bom = self.search([('product_tmpl_id', '=', product_tmpl_id)], limit=1)
             if not bom:
@@ -152,6 +133,39 @@ class MrpBom(models.Model):
             _logger.info(f"Successfully synced BOM {bom.id} from Fusion")
             return bom.id
 
+        except ValidationError as e:
+            _logger.error(f"Validation error syncing BOM from Fusion: {str(e)}")
+            raise UserError(f"Failed to sync BOM: {str(e)}")
         except Exception as e:
             _logger.error(f"Error syncing BOM from Fusion: {str(e)}")
             raise UserError(f"Failed to sync BOM: {str(e)}")
+
+    @api.model
+    def create_or_update_from_fusion(self, product_id, bom_lines):
+        """Create or update BoM from Fusion data."""
+        _logger.info(f"Creating/updating BoM for product ID: {product_id}")
+        
+        # Convert product_id to recordset
+        product = self.env['product.product'].browse(product_id)
+        if not product.exists():
+            raise ValidationError(f"Product with ID {product_id} does not exist")
+        
+        # Find existing BoM for this product
+        bom = self.search([('product_id', '=', product_id)], limit=1)
+        
+        # Prepare BoM values
+        vals = {
+            'product_id': product_id,
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'type': 'normal',
+            'bom_line_ids': bom_lines
+        }
+        
+        if not bom:
+            _logger.info("Creating new BoM")
+            bom = self.create(vals)
+        else:
+            _logger.info("Updating existing BoM")
+            bom.write(vals)
+        
+        return bom.id
