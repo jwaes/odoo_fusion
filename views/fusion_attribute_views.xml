@@ -1,74 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <!-- Attribute Tree View -->
-    <record id="fusion_product_attribute_tree_view" model="ir.ui.view">
-        <field name="name">product.attribute.fusion.tree.inherit</field>
-        <field name="model">product.attribute</field>
-        <field name="inherit_id" ref="product.attribute_tree_view"/>
-        <field name="arch" type="xml">
-            <field name="name" position="after">
-                <field name="is_fusion_attribute"/>
-            </field>
-        </field>
-    </record>
-
-    <!-- Attribute Form View -->
-    <record id="fusion_product_attribute_form_view" model="ir.ui.view">
-        <field name="name">product.attribute.fusion.form.inherit</field>
+    <!-- Product Attribute Form View -->
+    <record id="product_attribute_view_form_inherit" model="ir.ui.view">
+        <field name="name">product.attribute.form.inherit</field>
         <field name="model">product.attribute</field>
         <field name="inherit_id" ref="product.product_attribute_view_form"/>
         <field name="arch" type="xml">
             <field name="create_variant" position="after">
                 <field name="is_fusion_attribute"/>
             </field>
-        </field>
-    </record>
-
-    <!-- Attribute Value Tree View -->
-    <record id="fusion_product_attribute_value_tree_view" model="ir.ui.view">
-        <field name="name">product.attribute.value.fusion.tree.inherit</field>
-        <field name="model">product.attribute.value</field>
-        <field name="inherit_id" ref="product.attribute_tree_view"/>
-        <field name="arch" type="xml">
-            <field name="name" position="after">
+            <xpath expr="//field[@name='value_ids']/tree" position="inside">
                 <field name="fusion_uuid" groups="base.group_no_one"/>
-            </field>
+            </xpath>
         </field>
     </record>
-
-    <!-- Search View -->
-    <record id="fusion_product_attribute_search_view" model="ir.ui.view">
-        <field name="name">product.attribute.fusion.search</field>
-        <field name="model">product.attribute</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="name"/>
-                <field name="create_variant"/>
-                <filter string="Fusion Attributes" name="fusion_attributes" domain="[('is_fusion_attribute', '=', True)]"/>
-                <group expand="0" string="Group By">
-                    <filter string="Variant Creation" name="groupby_create_variant" 
-                            context="{'group_by': 'create_variant'}"/>
-                    <filter string="Fusion" name="groupby_fusion" 
-                            context="{'group_by': 'is_fusion_attribute'}"/>
-                </group>
-            </search>
-        </field>
-    </record>
-
-    <!-- Action -->
-    <record id="fusion_product_attribute_action" model="ir.actions.act_window">
-        <field name="name">Product Attributes</field>
-        <field name="res_model">product.attribute</field>
-        <field name="view_mode">tree,form</field>
-        <field name="search_view_id" ref="fusion_product_attribute_search_view"/>
-        <field name="context">{'search_default_fusion_attributes': 1}</field>
-    </record>
-
-    <!-- Menu Item -->
-    <menuitem id="menu_fusion_product_attribute"
-              name="Attributes"
-              parent="menu_fusion_root"
-              action="fusion_product_attribute_action"
-              sequence="20"
-              groups="group_fusion_user"/>
 </odoo>

@@ -1,6 +1,6 @@
 {
     'name': 'Odoo Fusion Integration',
-    'version': '17.0.1.0.69',  # Bumped version for attribute view fixes
+    'version': '17.0.1.0.72',  # Bumped version for attribute view cleanup
     'category': 'Manufacturing',
     'summary': 'Integration between Odoo and Autodesk Fusion 360',
     'author': 'Jaco Tech',
