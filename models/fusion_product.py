@@ -85,10 +85,6 @@ class FusionProduct(models.Model):
             _logger.info(f"Updating existing product: {product.name}")
             product.write(vals)
 
-        # Set default_code for single-variant products
-        if product.product_variant_count == 1:
-            product.product_variant_ids.default_code = product.fusion_generated_default_code
-        
         # Handle configurations
         if fusion_data.get('is_configuration'):
             _logger.info(f"Processing configuration instance with ID: {fusion_data['configuration_id']}")
@@ -143,13 +139,22 @@ class FusionProduct(models.Model):
                     })
                     _logger.info(f"Added configuration value to attribute line: {value.name}")
 
-            # Generate default_code for this variant
-            variant = product.product_variant_ids.filtered(
-                lambda v: value in v.product_template_attribute_value_ids.product_attribute_value_id
-            )
-            if variant:
-                variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', value.name)}"
-                _logger.info(f"Set variant default_code: {variant.default_code}")
+            # Update default_code for all variants
+            for variant in product.product_variant_ids:
+                config_value = variant.product_template_attribute_value_ids.product_attribute_value_id.filtered(
+                    lambda v: v.attribute_id == config_attr
+                )
+                if config_value:
+                    variant.default_code = f"{product.fusion_generated_default_code}/{re.sub(r'[^a-zA-Z0-9]', '_', config_value.name)}"
+                    _logger.info(f"Set variant default_code: {variant.default_code}")
+                else:
+                    # This is a variant without configuration, set its default_code with a suffix too
+                    variant.default_code = f"{product.fusion_generated_default_code}/base"
+                    _logger.info(f"Set base variant default_code: {variant.default_code}")
+        else:
+            # For non-configured products, set the default_code directly
+            if product.product_variant_count == 1:
+                product.product_variant_ids.default_code = product.fusion_generated_default_code
         
         return product.id
     

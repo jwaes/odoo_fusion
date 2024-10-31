@@ -24,6 +24,34 @@
         </field>
     </record>
 
+    <!-- Attribute Value Tree View -->
+    <record id="fusion_product_attribute_value_tree_view" model="ir.ui.view">
+        <field name="name">product.attribute.value.fusion.tree.inherit</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.variants_tree_view"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="fusion_uuid" 
+                       attrs="{'invisible': [('attribute_id.is_fusion_attribute', '=', False)], 'readonly': True}"
+                       groups="base.group_no_one"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Attribute Value Form View -->
+    <record id="fusion_product_attribute_value_form_view" model="ir.ui.view">
+        <field name="name">product.attribute.value.fusion.form.inherit</field>
+        <field name="model">product.attribute.value</field>
+        <field name="inherit_id" ref="product.product_attribute_value_view_form"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="fusion_uuid" 
+                       attrs="{'invisible': [('attribute_id.is_fusion_attribute', '=', False)], 'readonly': True}"
+                       groups="base.group_no_one"/>
+            </field>
+        </field>
+    </record>
+
     <!-- Search View -->
     <record id="fusion_product_attribute_search_view" model="ir.ui.view">
         <field name="name">product.attribute.fusion.search</field>
